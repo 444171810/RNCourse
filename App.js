@@ -1,20 +1,70 @@
+import { StyleSheet, View, FlatList } from 'react-native';
+import { useState } from 'react';
+import GoalItem from './components/GoalItem';
+import GoalInput from './components/GoalInput';
+import { Icon } from '@rneui/themed';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+
+  const [goals, setGoals] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+
+
+  addGoalHandler = (inputText) => {
+    if (inputText.trim === '') {
+      return
+    }
+    setGoals(currentGoals => ([...currentGoals, { text: inputText.trim(), id: Math.random() }]))
+  }
+
+  deleteGoalHandler = (id) => {
+    setGoals(goals => goals.filter(item => item.id !== id))
+  }
+
+  toggleModal = () => {
+    setModalOpen(modalOpen => !modalOpen)
+  }
+  closeModalHandler = () => {
+    setModalOpen(false);
+  }
+
+  return (<>
+    <StatusBar style="dark" />
+    <View style={styles.appContainer}>
+      <Icon
+        color="#11aa55"
+        iconStyle={{ fontSize: 33 }}
+        name="add"
+        reverse
+        size={20}
+        type="material"
+        onPress={toggleModal}
+      />
+      <GoalInput visible={modalOpen} addGoal={addGoalHandler} closeModal={closeModalHandler} />
+
+      <View style={styles.goalsContainer}>
+        <FlatList
+          data={goals}
+          renderItem={goalItem => {
+            return (<GoalItem item={goalItem.item} deleteGoal={deleteGoalHandler} />)
+          }
+          }
+          keyExtractor={item => item.id}
+        />
+      </View>
     </View>
+  </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+  appContainer: {
+    paddingTop: 50,
+    paddingHorizontal: 10,
+    flex: 1
+  },
+  goalsContainer: {
+    flex: 5
   },
 });
